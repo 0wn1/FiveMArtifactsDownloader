@@ -15,17 +15,18 @@ class FiveMArtifactsDownloader
             throw new ArgumentNullException(nameof(args));
         }
 
-        Console.Title = "FiveMArtifactsDownloader";
+        Console.Title = "FiveMArtifactsDownloader v1.1";
         try
         {
 
             var client = new HttpClient();
-            var response = await client.GetAsync(apiURL);
-            var content = await response.Content.ReadAsStringAsync();
-            var versions = JsonConvert.DeserializeObject<dynamic>(content);
+            dynamic? versions = null;
 
-            if (versions == null) {
-                return;
+            while (versions == null)
+            {
+                var response = await client.GetAsync(apiURL);
+                var content = await response.Content.ReadAsStringAsync();
+                versions = JsonConvert.DeserializeObject<dynamic>(content);
             }
 
             Console.WriteLine("Select a FiveM Artifact:");
@@ -129,6 +130,5 @@ class FiveMArtifactsDownloader
     {
         string backupDirName = $"backup_{DateTime.Now:yyyyMMddHHmmss}";
         Directory.Move(artifactsDir, backupDirName);
-        //Console.WriteLine($"Artifacts folder was renamed to \"{backupDirName}\"");
     }
 }
