@@ -1,21 +1,45 @@
-﻿using System.IO.Compression;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.IO.Compression;
 
 class FiveMArtifactsDownloader
 {
-    static readonly string apiURL = "https://changelogs-live.fivem.net/api/changelog/versions/win32/server";
     static readonly string artifactsDir = "artifacts";
     static ChangelogResponse? changelogResponse;
+    static string apiURL = "";
+    static string? zípExtension;
+    static string? input;
 
     static async Task Main(string[] args)
 
     {
-        if (args is null)
+        Console.Title = "FiveMArtifactsDownloader v1.1";
+        Console.Title = "FiveMArtifactsDownloader v1.1.1";
+
+        Console.WriteLine("Select the platform you want to use:");
+        Console.WriteLine("1 - Windows");
+        Console.WriteLine("2 - Linux");
+        int platform;
+        input = Console.ReadLine();
+
+        while (!int.TryParse(input, out platform) || platform < 1 || platform > 2)
         {
-            throw new ArgumentNullException(nameof(args));
+            Console.WriteLine("Select the platform you want to use:");
+            Console.WriteLine("1 - Windows");
+            Console.WriteLine("2 - Linux");
+            input = Console.ReadLine();
         }
 
-        Console.Title = "FiveMArtifactsDownloader v1.1";
+        if (platform == 1)
+        {
+            apiURL = "https://changelogs-live.fivem.net/api/changelog/versions/win32/server";
+            zípExtension = ".zip";
+        }
+        else if (platform == 2)
+        {
+            apiURL = "https://changelogs-live.fivem.net/api/changelog/versions/linux/server";
+            zípExtension = ".tar.xz";
+        }
+
         try
         {
 
@@ -86,13 +110,9 @@ class FiveMArtifactsDownloader
 
     class ChangelogResponse
     {
-        public string? latest { get; set; }
         public string? latest_download { get; set; }
-        public string? optional { get; set; }
         public string? optional_download { get; set; }
-        public string? recommended { get; set; }
         public string? recommended_download { get; set; }
-        public string? critical { get; set; }
         public string? critical_download { get; set; }
     }
 
@@ -112,17 +132,19 @@ class FiveMArtifactsDownloader
         using (HttpClient client = new())
         {
             Console.Clear();
-            Console.WriteLine($"Downloading selected build...");
+            Console.WriteLine($"Downloading " + $"{userInputChoice + zípExtension}...");
             using Stream stream = await client.GetStreamAsync(downloadURL);
-            using FileStream fs = new($"{artifactsDir}/{userInputChoice}.zip", FileMode.Create, FileAccess.Write);
+            using FileStream fs = new($"{artifactsDir}/{userInputChoice + zípExtension}", FileMode.Create, FileAccess.Write);
             await stream.CopyToAsync(fs);
         }
+        if (input == "1")
+        {
+            Console.WriteLine($"Extracting " + $"{userInputChoice + zípExtension}...");
+            ZipFile.ExtractToDirectory($"{artifactsDir}/{userInputChoice + zípExtension}", artifactsDir);
 
-        Console.WriteLine($"Extracting selected build...");
-        ZipFile.ExtractToDirectory($"{artifactsDir}/{userInputChoice}.zip", artifactsDir);
-
-        Console.WriteLine($"Deleting downloaded zip file...");
-        File.Delete($"{artifactsDir}/{userInputChoice}.zip");
+            Console.WriteLine($"Deleting " + $"{userInputChoice + zípExtension}...");
+            File.Delete($"{artifactsDir}/{userInputChoice + zípExtension}");
+        }
         Console.WriteLine($"Download successfully completed!");
     }
 
