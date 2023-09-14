@@ -12,7 +12,6 @@ class FiveMArtifactsDownloader
     static async Task Main(string[] args)
 
     {
-        Console.Title = "FiveMArtifactsDownloader v1.1";
         Console.Title = "FiveMArtifactsDownloader v1.1.1";
 
         Console.WriteLine("Select the platform you want to use:");
